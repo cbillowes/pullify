@@ -5,6 +5,8 @@ set -euo pipefail
 path=$1
 repo_file=$2
 
+[[ ! -d repos ]] && mkdir -p repos
+
 > "$repo_file"  # Clear/create the file
 
 echo "Writing to $repo_file"
