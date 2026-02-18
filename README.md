@@ -1,6 +1,7 @@
 # Pullify
 
 Pullify is a utility suite to help keep your Git repositories in a given directory up to date.
+This is useful if you have directories that contain multiple Git repositories and you want to quickly check their status or pull the latest changes without having to navigate into each repository individually.
 
 ## Installation
 
