@@ -1,0 +1,63 @@
+#!/bin/bash
+
+show_help() {
+  echo -e "\033[31mError: TODO\033[0m"
+  echo "Usage: $0 <command> [options]"
+  echo "Commands: scan, init, status, pull"
+  echo "Options:"
+  echo "   --path PATH    Path to the repository directory (absolute or relative to $PWD)"
+  echo "   -h, --help     Show this help message"
+}
+
+# Extract command as first argument
+if [[ -z "$1" ]]; then
+  show_help
+  exit 1
+fi
+
+cmd="$1"
+shift
+
+# Parse remaining arguments
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h|--help)
+      show_help
+      exit 0
+      ;;
+    --path)
+      path="$2"
+      shift 2
+      ;;
+    --path=*)
+      path="${1#*=}"
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      show_help
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -z "$path" ]]; then
+  show_help
+  exit 1
+fi
+
+path="$PWD/$path"
+repo_file="$PWD/repos/$(basename "$path").txt"
+
+if [[ "$cmd" == "init" ]]; then
+  bash ./init $path $repo_file
+elif [[ "$cmd" == "scan" ]]; then
+  bash ./scan $path
+elif [[ "$cmd" == "pull" ]]; then
+  bash ./pull $path $repo_file
+elif [[ "$cmd" == "status" ]]; then
+  bash ./status $path $repo_file
+else
+  show_help
+  exit 1
+fi
