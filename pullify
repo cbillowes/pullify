@@ -45,9 +45,10 @@ if [[ -z "$path" ]]; then
   exit 1
 fi
 
-path="$PWD/$path"
-repo_file="$PWD/repos/$(basename "$path").txt"
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+path="$PWD/$basename"
+base=$(basename "$path")
+repo_file="$script_dir/repos/$base.txt"
 
 if [[ "$cmd" == "init" ]]; then
   bash "$script_dir/init.sh" "$path" "$repo_file"
