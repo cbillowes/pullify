@@ -25,6 +25,14 @@ For example:
 ./pullify init --path /path/to/repos
 ```
 
+```bash
+# Set up an alias
+alias pullify="/Users/user/path/to/pullify/pullify"
+
+# Reload your shell, eg source ~/.zshrc
+pullify scan --path /path/to/repos
+```
+
 ### Scan
 
 Scan will look for all Git repositories in the specified directory and print their status.
