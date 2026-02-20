@@ -1,7 +1,6 @@
 #!/bin/bash
 
 show_help() {
-  echo -e "\033[31mError: TODO\033[0m"
   echo "Usage: $0 <command> [options]"
   echo "Commands: scan, init, status, pull"
   echo "Options:"
