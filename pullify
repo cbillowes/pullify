@@ -47,15 +47,16 @@ fi
 
 path="$PWD/$path"
 repo_file="$PWD/repos/$(basename "$path").txt"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [[ "$cmd" == "init" ]]; then
-  bash ./init $path $repo_file
+  bash "$script_dir/init.sh" "$path" "$repo_file"
 elif [[ "$cmd" == "scan" ]]; then
-  bash ./scan $path
+  bash "$script_dir/scan.sh" "$path"
 elif [[ "$cmd" == "pull" ]]; then
-  bash ./pull $path $repo_file
+  bash "$script_dir/pull.sh" "$path" "$repo_file"
 elif [[ "$cmd" == "status" ]]; then
-  bash ./status $path $repo_file
+  bash "$script_dir/status.sh" "$path" "$repo_file"
 else
   show_help
   exit 1
