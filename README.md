@@ -31,6 +31,9 @@ alias pullify="/Users/user/path/to/pullify/pullify"
 
 # Reload your shell, eg source ~/.zshrc
 pullify scan --path /path/to/repos
+
+# For current directory
+pullify scan --path .
 ```
 
 ### Scan
