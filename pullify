@@ -2,7 +2,7 @@
 
 show_help() {
   echo "Usage: $0 <command> [options]"
-  echo "Commands: scan, init, status, pull"
+  echo "Commands: scan, init, status, pull, trunk"
   echo "Options:"
   echo "   --path PATH    Path to the repository directory (absolute or relative to $PWD)"
   echo "   -h, --help     Show this help message"
@@ -57,6 +57,8 @@ elif [[ "$cmd" == "pull" ]]; then
   bash "$script_dir/pull.sh" "$path" "$repo_file"
 elif [[ "$cmd" == "status" ]]; then
   bash "$script_dir/status.sh" "$path" "$repo_file"
+elif [[ "$cmd" == "trunk" ]]; then
+  bash "$script_dir/trunk.sh" "$path" "$repo_file"
 else
   show_help
   exit 1
