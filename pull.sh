@@ -14,6 +14,17 @@ RED="\033[31m"
 CYAN="\033[36m"
 BOLD_WHITE="\033[1;37m"
 
+# Pad $1 to visual width $2, compensating for multi-byte Unicode characters.
+# printf "%-Ns" counts bytes, not visible columns — e.g. "✓" is 3 bytes but 1
+# column, so without correction the cell comes out 2 columns too narrow.
+pad_str() {
+  local str="$1" width="$2"
+  local byte_len=${#str}
+  local char_len
+  char_len=$(printf '%s' "$str" | wc -m | tr -d '[:space:]')
+  printf "%-$(( width + byte_len - char_len ))s" "$str"
+}
+
 # ── Collect results and pull where needed ─────────────────────────────────────
 
 declare -a col_repo col_trunk col_branch col_trunk_pulled col_branch_updated col_stash col_result col_type
@@ -206,7 +217,7 @@ hr() { printf '─%.0s' $(seq 1 $(( $1 + 2 ))); }
 
 echo
 echo -e "  ┌$(hr $max_repo)┬$(hr $max_trunk)┬$(hr $max_branch)┬$(hr $max_trunk_pulled)┬$(hr $max_branch_updated)┬$(hr $max_stash)┬$(hr $max_result)┐"
-echo -e "  │ ${BOLD}$(printf "%-${max_repo}s"            "Repository")${RESET} │ ${BOLD}$(printf "%-${max_trunk}s"           "Trunk")${RESET} │ ${BOLD}$(printf "%-${max_branch}s"          "Branch")${RESET} │ ${BOLD}$(printf "%-${max_trunk_pulled}s"    "Trunk ↓")${RESET} │ ${BOLD}$(printf "%-${max_branch_updated}s"  "Branch ↓")${RESET} │ ${BOLD}$(printf "%-${max_stash}s"            "Stash")${RESET} │ ${BOLD}$(printf "%-${max_result}s"           "Result")${RESET} │"
+echo -e "  │ ${BOLD}$(pad_str "Repository" $max_repo)${RESET} │ ${BOLD}$(pad_str "Trunk" $max_trunk)${RESET} │ ${BOLD}$(pad_str "Branch" $max_branch)${RESET} │ ${BOLD}$(pad_str "Trunk ↓" $max_trunk_pulled)${RESET} │ ${BOLD}$(pad_str "Branch ↓" $max_branch_updated)${RESET} │ ${BOLD}$(pad_str "Stash" $max_stash)${RESET} │ ${BOLD}$(pad_str "Result" $max_result)${RESET} │"
 echo -e "  ├$(hr $max_repo)┼$(hr $max_trunk)┼$(hr $max_branch)┼$(hr $max_trunk_pulled)┼$(hr $max_branch_updated)┼$(hr $max_stash)┼$(hr $max_result)┤"
 
 for i in "${!col_repo[@]}"; do
@@ -219,14 +230,16 @@ for i in "${!col_repo[@]}"; do
   result="${col_result[$i]}"
   type="${col_type[$i]}"
 
-  # Pre-pad all plain strings before applying color so column widths stay correct
-  repo_p=$(printf           "%-${max_repo}s"           "$repo")
-  trunk_p=$(printf          "%-${max_trunk}s"          "$trunk")
-  branch_p=$(printf         "%-${max_branch}s"         "$branch")
-  trunk_pulled_p=$(printf   "%-${max_trunk_pulled}s"   "$trunk_pulled")
-  branch_updated_p=$(printf "%-${max_branch_updated}s" "$branch_updated")
-  stash_p=$(printf          "%-${max_stash}s"          "$stash")
-  result_p=$(printf         "%-${max_result}s"         "$result")
+  # Pre-pad all strings to their column's visual width before applying color.
+  # pad_str compensates for multi-byte Unicode so printf byte-counting doesn't
+  # produce columns that are visually too narrow (e.g. "✓" = 3 bytes, 1 column).
+  repo_p=$(pad_str           "$repo"           $max_repo)
+  trunk_p=$(pad_str          "$trunk"          $max_trunk)
+  branch_p=$(pad_str         "$branch"         $max_branch)
+  trunk_pulled_p=$(pad_str   "$trunk_pulled"   $max_trunk_pulled)
+  branch_updated_p=$(pad_str "$branch_updated" $max_branch_updated)
+  stash_p=$(pad_str          "$stash"          $max_stash)
+  result_p=$(pad_str         "$result"         $max_result)
 
   # Indicator and stash columns are colored per-value
   case "$trunk_pulled" in

@@ -21,6 +21,17 @@ RED="\033[31m"
 CYAN="\033[36m"
 BOLD_WHITE="\033[1;37m"
 
+# Pad $1 to visual width $2, compensating for multi-byte Unicode characters.
+# printf "%-Ns" counts bytes, not visible columns — e.g. "✓" is 3 bytes but 1
+# column, so without correction the cell comes out 2 columns too narrow.
+pad_str() {
+  local str="$1" width="$2"
+  local byte_len=${#str}
+  local char_len
+  char_len=$(printf '%s' "$str" | wc -m | tr -d '[:space:]')
+  printf "%-$(( width + byte_len - char_len ))s" "$str"
+}
+
 # ── First pass: collect rows and compute column widths ────────────────────────
 
 declare -a col_repo col_trunk col_branch col_status col_type
@@ -129,7 +140,7 @@ hr() { printf '─%.0s' $(seq 1 $(( $1 + 2 ))); }
 
 echo
 echo -e "  ┌$(hr $max_repo)┬$(hr $max_trunk)┬$(hr $max_branch)┬$(hr $status_col_width)┐"
-echo -e "  │ ${BOLD}$(printf "%-${max_repo}s"  "Repository")${RESET} │ ${BOLD}$(printf "%-${max_trunk}s" "Trunk")${RESET} │ ${BOLD}$(printf "%-${max_branch}s" "Branch")${RESET} │ ${BOLD}$(printf "%-${status_col_width}s" "  Status")${RESET} │"
+echo -e "  │ ${BOLD}$(pad_str "Repository" $max_repo)${RESET} │ ${BOLD}$(pad_str "Trunk" $max_trunk)${RESET} │ ${BOLD}$(pad_str "Branch" $max_branch)${RESET} │ ${BOLD}$(pad_str "  Status" $status_col_width)${RESET} │"
 echo -e "  ├$(hr $max_repo)┼$(hr $max_trunk)┼$(hr $max_branch)┼$(hr $status_col_width)┤"
 
 for i in "${!col_repo[@]}"; do
@@ -139,12 +150,13 @@ for i in "${!col_repo[@]}"; do
   status="${col_status[$i]}"
   type="${col_type[$i]}"
 
-  # Pre-pad plain strings — color codes applied around the padded value so
-  # invisible escape sequences don't skew column widths
-  repo_p=$(printf   "%-${max_repo}s"   "$repo")
-  trunk_p=$(printf  "%-${max_trunk}s"  "$trunk")
-  branch_p=$(printf "%-${max_branch}s" "$branch")
-  status_p=$(printf "%-${max_status}s" "$status")
+  # Pre-pad strings to their column's visual width before applying color.
+  # pad_str compensates for multi-byte Unicode so printf byte-counting doesn't
+  # produce columns that are visually too narrow.
+  repo_p=$(pad_str   "$repo"   $max_repo)
+  trunk_p=$(pad_str  "$trunk"  $max_trunk)
+  branch_p=$(pad_str "$branch" $max_branch)
+  status_p=$(pad_str "$status" $max_status)
 
   case "$type" in
     ok)
